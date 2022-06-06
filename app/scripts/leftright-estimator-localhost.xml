@@ -1,0 +1,89 @@
+<application>
+<name>face recognition</name>
+<version>1.0</version>
+
+
+	<module>
+		<name>yarpdev</name>
+		<parameters> --from /home/marialombardi/Workspace/yarpApps/RealSense_conf.ini</parameters>
+		<node>localhost</node>
+	</module>
+
+
+	<module>
+		<name>yarpOpenPose</name>
+		<parameters>--from /home/marialombardi/Workspace/leftright-gaze-estimator-demo/app/config/yarpOpenpose.ini</parameters>
+		<node>localhost</node>
+	</module>
+
+	
+	<!-- Path: realsense -> view -->
+
+	<module>
+		<name>yarpview</name>
+		<parameters>--name /view/rgb --w 640 --h 480</parameters>
+		<node>localhost</node>
+	</module>
+
+	<connection>
+		<from>/depthCamera/rgbImage:o</from>
+		<to>/view/rgb</to>
+		<protocol>mjpeg</protocol>
+	</connection>
+
+	
+	<!-- Path: real sense -> openPose -> view skeleton -->
+
+	<module>
+		<name>yarpview</name>
+		<parameters>--name /view/skeleton --w 640 --h 480</parameters>
+		<node>localhost</node>
+	</module>
+
+	
+	<connection>
+		<from>/depthCamera/rgbImage:o</from>
+		<to>/yarpOpenPose/image:i</to>
+		<protocol>mjpeg</protocol>
+	</connection>
+
+
+	<connection>
+		<from>/yarpOpenPose/image:o</from>
+		<to>/view/skeleton</to>
+		<protocol>mjpeg</protocol>
+	</connection>
+
+	
+
+	<!-- Path: real sense -> openPose -> python module -> view -->
+
+
+	<module>
+	      	<name>yarpview</name>
+	      	<parameters>--name /view/leftright --w 640 --h 480</parameters>
+	      	<node>localhost</node>
+	</module>
+
+
+	<connection>
+		<from>/yarpOpenPose/propag:o</from>
+		<to>/leftrightestimator/image:i</to>
+		<protocol>mjpeg</protocol>
+	</connection>
+
+	<connection>
+		<from>/yarpOpenPose/target:o</from>
+		<to>/leftrightestimator/data:i</to>
+	</connection>
+
+
+	<connection>
+	      	<from>/leftrightestimator/image:o</from>
+	      	<to>/view/leftright</to>
+	      	<protocol>mjpeg</protocol>
+	</connection>
+	
+
+</application>
+
