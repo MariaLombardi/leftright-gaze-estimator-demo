@@ -70,6 +70,8 @@ class LeftRightEstimator(yarp.RFModule):
         self.svm_buffer = []
         self.id_image = '%08d' % 0
 
+        self.human_image = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 3), dtype=np.uint8)
+
         return True
 
     def respond(self, command, reply):
@@ -112,6 +114,7 @@ class LeftRightEstimator(yarp.RFModule):
         if received_image:
             self.in_buf_human_image.copy(received_image)
             human_image = np.copy(self.in_buf_human_array)
+            self.human_image = np.copy(human_image)
             self.id_image = '%08d' % ((int(self.id_image) + 1) % 100000)
 
             received_data = self.in_port_human_data.read()
@@ -160,7 +163,7 @@ class LeftRightEstimator(yarp.RFModule):
                     self.out_port_human_image.write(self.out_buf_human_image)
                     self.out_port_prediction.write(pred)
                     # propag received image
-                    self.out_buf_propag_array[:, :] = received_image
+                    self.out_buf_propag_array[:, :] = self.human_image
                     self.out_port_propag_image.write(self.out_buf_propag_image)
 
                     self.buffer = (self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), y_winner, prob_mean)
@@ -174,7 +177,7 @@ class LeftRightEstimator(yarp.RFModule):
                     self.out_port_human_image.write(self.out_buf_human_image)
                     self.out_port_prediction.write(pred)
                     # propag received image
-                    self.out_buf_propag_array[:, :] = received_image
+                    self.out_buf_propag_array[:, :] = self.human_image
                     self.out_port_propag_image.write(self.out_buf_propag_image)
 
                     self.buffer = (self.id_image, (), 'unknown', -1)
