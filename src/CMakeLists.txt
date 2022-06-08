@@ -12,7 +12,7 @@ if(NOT EXISTS ${import_path})
 	message(FATAL_ERROR "the python functions in utilitis and config are not in the expected folder.")
 endif()
 
-configure_file(face-recogniser.py.in left-right-estimator.py @ONLY)
+configure_file(leftright-estimator.py.in leftright-estimator.py @ONLY)
 
 set(python_bin ${CMAKE_CURRENT_SOURCE_DIR}/../build/src/leftright-estimator.py)
 
