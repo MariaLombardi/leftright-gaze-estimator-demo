@@ -207,6 +207,12 @@ def create_bottle(output):
     output_bottle.addString(output[2])
     output_bottle.addFloat64(float(output[3]))
 
+    skeleton = output[4]
+    if skeleton:
+        output_bottle.addList().read(skeleton)
+    else:
+        output_bottle.addList().read(yarp.Bottle())
+
     return output_bottle
 
 

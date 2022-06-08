@@ -158,7 +158,7 @@ class LeftRightEstimator(yarp.RFModule):
                         prob_mean = np.mean(prob_values)
 
                     label = list(CLASS_DICT.keys())[y_winner]
-                    pred = create_bottle((self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), label, prob_mean))
+                    pred = create_bottle((self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), label, prob_mean, received_data.get(0)))
                     human_image = draw_on_img(human_image, self.id_image, (ld[itP, 0], ld[itP, 1]), label, prob_mean)
 
                     self.out_buf_human_array[:, :] = human_image
@@ -170,7 +170,7 @@ class LeftRightEstimator(yarp.RFModule):
 
                     self.buffer = (self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), y_winner, prob_mean)
                 else:
-                    pred = create_bottle((self.id_image, (), 'unknown', -1))
+                    pred = create_bottle((self.id_image, (), 'unknown', -1, ()))
                     human_image = cv2.putText(human_image, 'id: ' + str(self.id_image), tuple([25, 30]), cv2.FONT_HERSHEY_SIMPLEX,
                                               0.6, (0, 0, 255), 2, cv2.LINE_AA)
 
