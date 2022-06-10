@@ -83,6 +83,23 @@
 	      	<to>/view/leftright</to>
 	      	<protocol>mjpeg</protocol>
 	</connection>
+
+
+	<!-- data dumper -->
+
+	<module>
+		<name>yarpdatadumper</name>
+		<parameters>--name /datadumper/leftright --dir /Desktop/dataset_mg/dump --type bottle</parameters>
+		<node>localhost</node>
+		<stdio></stdio>
+		<tag>yarpdatadumper</tag>
+    	</module>
+
+
+	<connection>
+        	<from>/leftright/pred:o</from>
+        	<to>/datadumper/leftright</to>
+    	</connection>
 	
 
 </application>
