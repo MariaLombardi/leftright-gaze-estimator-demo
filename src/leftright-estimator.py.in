@@ -5,6 +5,7 @@ import yarp
 import sys
 import pickle as pk
 import cv2
+import distutils.util
 
 sys.path.append('@import_path@')
 
@@ -20,6 +21,8 @@ class LeftRightEstimator(yarp.RFModule):
         model_name = rf.find("leftrightestimator_model_name").asString()
         self.clf = pk.load(open('@import_path@' + '/' + model_name, 'rb'))
         print('SVM model file: %s' % model_name)
+        self.CAMERA_POV = bool(distutils.util.strtobool((rf.find("camera_point_of_view").asString())))
+        print('Camera point of view: %s' % str(self.CAMERA_POV))
 
         # input port for rgb image
         self.in_port_human_image = yarp.BufferedPortImageRgb()
@@ -156,6 +159,13 @@ class LeftRightEstimator(yarp.RFModule):
                             [self.svm_buffer[i][1] for i in range(0, len(self.svm_buffer)) if
                              self.svm_buffer[i][0] == y_winner])
                         prob_mean = np.mean(prob_values)
+
+                    # reverse the result depending of camera pov
+                    if not self.CAMERA_POV:
+                        if y_winner == 0:
+                            y_winner = 1
+                        if y_winner == 1:
+                            y_winner = 0
 
                     label = list(CLASS_DICT.keys())[y_winner]
                     pred = create_bottle((self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), label, prob_mean, received_data.get(0)))
