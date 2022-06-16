@@ -164,7 +164,7 @@ class LeftRightEstimator(yarp.RFModule):
                     if not self.CAMERA_POV:
                         if y_winner == 0:
                             y_winner = 1
-                        if y_winner == 1:
+                        elif y_winner == 1:
                             y_winner = 0
 
                     label = list(CLASS_DICT.keys())[y_winner]
