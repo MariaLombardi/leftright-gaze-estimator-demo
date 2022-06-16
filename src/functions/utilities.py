@@ -195,23 +195,38 @@ def read_openpose_data(received_data):
 
 
 def create_bottle(output):
+    output_bottle = yarp.Bottle()
+
+    id_bottle = yarp.Bottle()
+    id_bottle.addString("id")
+    id_bottle.addString(output[0])
+
     centroid = output[1]
     centroid_bottle = yarp.Bottle()
+    centroid_bottle.addString("cog")
     if centroid:
         centroid_bottle.addInt32(int(centroid[0]))
         centroid_bottle.addInt32(int(centroid[1]))
 
-    output_bottle = yarp.Bottle()
-    output_bottle.addString(output[0])
-    output_bottle.addList().read(centroid_bottle)
-    output_bottle.addString(output[2])
-    output_bottle.addFloat64(float(output[3]))
+    pred_bottle = yarp.Bottle()
+    pred_bottle.addString("hand")
+    pred_bottle.addString(output[2])
+
+    conf_bottle = yarp.Bottle()
+    conf_bottle.addString("conf")
+    conf_bottle.addFloat64(float(output[3]))
 
     skeleton = output[4]
+    skeleton_bottle = yarp.Bottle()
+    skeleton_bottle.addString("keypoints")
     if skeleton:
-        output_bottle.addList().read(skeleton)
-    else:
-        output_bottle.addList().read(yarp.Bottle())
+        skeleton_bottle.addList().read(skeleton)
+
+    output_bottle.addList().read(id_bottle)
+    output_bottle.addList().read(centroid_bottle)
+    output_bottle.addList().read(pred_bottle)
+    output_bottle.addList().read(conf_bottle)
+    output_bottle.addList().read(skeleton_bottle)
 
     return output_bottle
 
