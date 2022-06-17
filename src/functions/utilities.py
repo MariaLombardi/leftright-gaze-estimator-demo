@@ -228,7 +228,10 @@ def create_bottle(output):
     output_bottle.addList().read(conf_bottle)
     output_bottle.addList().read(skeleton_bottle)
 
-    return output_bottle
+    final_bottle = yarp.Bottle()
+    final_bottle.addList().read(output_bottle)
+
+    return final_bottle
 
 
 def draw_on_img(img, id, centroid, y_pred, prob):

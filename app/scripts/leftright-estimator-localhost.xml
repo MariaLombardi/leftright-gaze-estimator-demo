@@ -1,5 +1,5 @@
 <application>
-<name>face recognition</name>
+<name>left right estimator</name>
 <version>1.0</version>
 
 
@@ -25,10 +25,22 @@
 		<node>localhost</node>
 	</module>
 
+	<module>
+		<name>yarpview</name>
+		<parameters>--name /view/depth --w 640 --h 480</parameters>
+		<node>localhost</node>
+	</module>
+
 	<connection>
 		<from>/depthCamera/rgbImage:o</from>
 		<to>/view/rgb</to>
 		<protocol>mjpeg</protocol>
+	</connection>
+
+	<connection>
+		<from>/depthCamera/depthImage:o</from>
+		<to>/view/depth</to>
+		<protocol>fast_tcp+recv.portmonitor+type.dll+file.depthimage</protocol>
 	</connection>
 
 	
@@ -40,13 +52,11 @@
 		<node>localhost</node>
 	</module>
 
-	
 	<connection>
 		<from>/depthCamera/rgbImage:o</from>
 		<to>/yarpOpenPose/image:i</to>
 		<protocol>mjpeg</protocol>
 	</connection>
-
 
 	<connection>
 		<from>/yarpOpenPose/image:o</from>
@@ -54,10 +64,8 @@
 		<protocol>mjpeg</protocol>
 	</connection>
 
-	
 
 	<!-- Path: real sense -> openPose -> python module -> view -->
-
 
 	<module>
 	      	<name>yarpview</name>
@@ -75,8 +83,8 @@
 	<connection>
 		<from>/yarpOpenPose/target:o</from>
 		<to>/leftrightestimator/data:i</to>
+		<protocol>fast_tcp</protocol>
 	</connection>
-
 
 	<connection>
 	      	<from>/leftrightestimator/image:o</from>
@@ -89,18 +97,45 @@
 
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /datadumper/leftright --dir /Desktop/dataset_mg/dump --type bottle</parameters>
+		<parameters>--name /datadumper/leftright --dir /Desktop/dataset/post_sequence1/leftright --type bottle --txTime --rxTime</parameters>
 		<node>localhost</node>
 		<stdio></stdio>
-		<tag>yarpdatadumper</tag>
-    	</module>
-
+		<tag>yarpdatadumper_leftright</tag>
+		<protocol>fast_tcp</protocol>
+	</module>
 
 	<connection>
-        	<from>/leftright/pred:o</from>
+        	<from>/leftrightestimator/pred:o</from>
         	<to>/datadumper/leftright</to>
-    	</connection>
-	
+	</connection>
+
+	<module>
+		<name>yarpdatadumper</name>
+		<parameters>--name /datadumper/rgb --dir /Desktop/dataset/post_sequence1/rgb --type image --txTime --rxTime</parameters>
+		<node>localhost</node>
+		<stdio></stdio>
+		<tag>yarpdatadumper_rgb</tag>
+		<protocol>fast_tcp</protocol>
+	</module>
+
+	<connection>
+        	<from>/leftrightestimator/propag:o</from>
+        	<to>/datadumper/rgb</to>
+	</connection>
+
+	<module>
+		<name>yarpdatadumper</name>
+		<parameters>--name /datadumper/depth --dir /Desktop/dataset/post_sequence1/depth --type depth --txTime --rxTime</parameters>
+		<node>localhost</node>
+		<stdio></stdio>
+		<tag>yarpdatadumper_depth</tag>
+		<protocol>fast_tcp</protocol>
+	</module>
+
+	<connection>
+		<from>/depthCamera/depthImage:o</from>
+		<to>/datadumper/depth</to>
+	</connection>
 
 </application>
 
