@@ -52,12 +52,22 @@ class LeftRightEstimator(yarp.RFModule):
         # propag input image
         self.out_port_propag_image = yarp.Port()
         self.out_port_propag_image.open('/leftrightestimator/propag:o')
-        self.out_buf_propag_array = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 3), dtype=np.uint8)
+        self.out_buf_propag_image_array = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 3), dtype=np.uint8)
         self.out_buf_propag_image = yarp.ImageRgb()
         self.out_buf_propag_image.resize(IMAGE_WIDTH, IMAGE_HEIGHT)
-        self.out_buf_propag_image.setExternal(self.out_buf_propag_array.data, self.out_buf_propag_array.shape[1],
-                                              self.out_buf_propag_array.shape[0])
+        self.out_buf_propag_image.setExternal(self.out_buf_propag_image_array.data, self.out_buf_propag_image_array.shape[1],
+                                              self.out_buf_propag_image_array.shape[0])
         print('{:s} opened'.format('/leftrightestimator/propag:o'))
+
+        # propag input depth
+        self.out_port_propag_depth = yarp.Port()
+        self.out_port_propag_depth.open('/leftrightestimator/depth:o')
+        self.out_buf_propag_depth_array = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 1), dtype=np.float32)
+        self.out_buf_propag_depth = yarp.ImageFloat()
+        self.out_buf_propag_depth.resize(IMAGE_WIDTH, IMAGE_HEIGHT)
+        self.out_buf_propag_depth.setExternal(self.out_buf_propag_depth_array.data, self.out_buf_propag_depth_array.shape[1],
+                                              self.out_buf_propag_depth_array.shape[0])
+        print('{:s} opened'.format('/leftrightestimator/depth:o'))
 
         # output port for the selection
         self.out_port_prediction = yarp.Port()
@@ -99,6 +109,7 @@ class LeftRightEstimator(yarp.RFModule):
         self.in_port_human_data.close()
         self.out_port_human_image.close()
         self.out_port_propag_image.close()
+        self.out_port_propag_depth.close()
         self.out_port_prediction.close()
         return True
 
@@ -108,6 +119,7 @@ class LeftRightEstimator(yarp.RFModule):
         self.in_port_human_data.close()
         self.out_port_human_image.close()
         self.out_port_propag_image.close()
+        self.out_port_propag_depth.close()
         self.out_port_prediction.close()
         return True
 
@@ -115,12 +127,19 @@ class LeftRightEstimator(yarp.RFModule):
         return 0.001
 
     def updateModule(self):
+
         received_image = self.in_port_human_image.read()
+        received_depth = self.in_port_human_depth.read(False)
+
         if received_image:
             self.in_buf_human_image.copy(received_image)
             human_image = np.copy(self.in_buf_human_array)
             self.human_image = np.copy(human_image)
             self.id_image = '%08d' % ((int(self.id_image) + 1) % 100000)
+
+            if received_depth:
+                self.in_buf_human_depth.copy(received_depth)
+                human_depth = np.copy(self.in_buf_human_depth_array)
 
             received_data = self.in_port_human_data.read()
             if received_data:
@@ -174,9 +193,6 @@ class LeftRightEstimator(yarp.RFModule):
                     self.out_buf_human_array[:, :] = human_image
                     self.out_port_human_image.write(self.out_buf_human_image)
                     self.out_port_prediction.write(pred)
-                    # propag received image
-                    self.out_buf_propag_array[:, :] = self.human_image
-                    self.out_port_propag_image.write(self.out_buf_propag_image)
 
                     self.buffer = (self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), y_winner, prob_mean)
                 else:
@@ -188,11 +204,16 @@ class LeftRightEstimator(yarp.RFModule):
                     self.out_buf_human_array[:, :] = human_image
                     self.out_port_human_image.write(self.out_buf_human_image)
                     self.out_port_prediction.write(pred)
-                    # propag received image
-                    self.out_buf_propag_array[:, :] = self.human_image
-                    self.out_port_propag_image.write(self.out_buf_propag_image)
 
                     self.buffer = (self.id_image, (), 'unknown', -1)
+
+            # propag received image
+            self.out_buf_propag_image_array[:, :] = self.human_image
+            self.out_port_propag_image.write(self.out_buf_propag_image)
+            if received_depth:
+                # propag received depth
+                self.out_buf_propag_depth_array[:, :] = human_depth
+                self.out_port_propag_depth.write(self.out_buf_propag_depth)
 
         return True
 

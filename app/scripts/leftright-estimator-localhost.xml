@@ -25,22 +25,10 @@
 		<node>localhost</node>
 	</module>
 
-	<module>
-		<name>yarpview</name>
-		<parameters>--name /view/depth --w 640 --h 480</parameters>
-		<node>localhost</node>
-	</module>
-
 	<connection>
 		<from>/depthCamera/rgbImage:o</from>
 		<to>/view/rgb</to>
 		<protocol>mjpeg</protocol>
-	</connection>
-
-	<connection>
-		<from>/depthCamera/depthImage:o</from>
-		<to>/view/depth</to>
-		<protocol>fast_tcp+recv.portmonitor+type.dll+file.depthimage</protocol>
 	</connection>
 
 	
@@ -59,6 +47,12 @@
 	</connection>
 
 	<connection>
+		<from>/depthCamera/depthImage:o</from>
+		<to>/yarpOpenPose/float:i</to>
+		<protocol>fast_tcp</protocol>
+	</connection>
+
+	<connection>
 		<from>/yarpOpenPose/image:o</from>
 		<to>/view/skeleton</to>
 		<protocol>mjpeg</protocol>
@@ -73,11 +67,23 @@
 	      	<node>localhost</node>
 	</module>
 
+	<module>
+		<name>yarpview</name>
+		<parameters>--name /view/depth --w 640 --h 480</parameters>
+		<node>localhost</node>
+	</module>
+
 
 	<connection>
 		<from>/yarpOpenPose/propag:o</from>
 		<to>/leftrightestimator/image:i</to>
 		<protocol>mjpeg</protocol>
+	</connection>
+
+	<connection>
+		<from>/yarpOpenPose/float:o</from>
+		<to>/leftrightestimator/depth:i</to>
+		<protocol>fast_tcp</protocol>
 	</connection>
 
 	<connection>
@@ -87,9 +93,15 @@
 	</connection>
 
 	<connection>
-	      	<from>/leftrightestimator/image:o</from>
-	      	<to>/view/leftright</to>
-	      	<protocol>mjpeg</protocol>
+		<from>/leftrightestimator/image:o</from>
+		<to>/view/leftright</to>
+		<protocol>mjpeg</protocol>
+	</connection>
+
+	<connection>
+		<from>/leftrightestimator/depth:o</from>
+		<to>/view/depth</to>
+		<protocol>fast_tcp+recv.portmonitor+type.dll+file.depthimage</protocol>
 	</connection>
 
 
