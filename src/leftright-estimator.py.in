@@ -33,6 +33,16 @@ class LeftRightEstimator(yarp.RFModule):
         self.in_buf_human_image.setExternal(self.in_buf_human_array.data, self.in_buf_human_array.shape[1],
                                             self.in_buf_human_array.shape[0])
         print('{:s} opened'.format('/leftrightestimator/image:i'))
+        
+        # input port for depth
+        self.in_port_human_depth = yarp.BufferedPortImageFloat()
+        self.in_port_human_depth_name = '/leftrightestimator/depth:i'
+        self.in_port_human_depth.open(self.in_port_human_depth_name)
+        self.in_buf_human_depth_array = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 1), dtype=np.float32)
+        self.in_buf_human_depth = yarp.ImageFloat()
+        self.in_buf_human_depth.resize(IMAGE_WIDTH, IMAGE_HEIGHT)
+        self.in_buf_human_depth.setExternal(self.in_buf_human_depth_array.data, self.in_buf_human_depth_array.shape[1], self.in_buf_human_depth_array.shape[0])
+        print('{:s} opened'.format('/leftrightestimator/depth:i'))
 
         # input port for openpose data
         self.in_port_human_data = yarp.BufferedPortBottle()
@@ -107,6 +117,7 @@ class LeftRightEstimator(yarp.RFModule):
         print('Cleanup function')
         self.in_port_human_image.close()
         self.in_port_human_data.close()
+        self.in_port_human_depth.close()
         self.out_port_human_image.close()
         self.out_port_propag_image.close()
         self.out_port_propag_depth.close()
@@ -117,6 +128,7 @@ class LeftRightEstimator(yarp.RFModule):
         print('Interrupt function')
         self.in_port_human_image.close()
         self.in_port_human_data.close()
+        self.in_port_human_depth.close()
         self.out_port_human_image.close()
         self.out_port_propag_image.close()
         self.out_port_propag_depth.close()
