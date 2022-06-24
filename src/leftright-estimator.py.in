@@ -155,6 +155,9 @@ class LeftRightEstimator(yarp.RFModule):
 
             received_data = self.in_port_human_data.read()
             if received_data:
+                # take only the person with id 0, we suppose that there is only one person in the scene
+                itP = 0
+
                 poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
                 # get features of all people in the image
                 data = get_features(poses, conf_poses, faces, conf_faces)
@@ -169,8 +172,7 @@ class LeftRightEstimator(yarp.RFModule):
 
                     # return a prob value between 0,1 for each class
                     y_classes = self.clf.predict_proba(wx)
-                    # take only the person with id 0, we suppose that there is only one person in the scene
-                    itP = 0
+
                     prob = max(y_classes[itP])
                     y_pred = (np.where(y_classes[itP] == prob))[0]
 
@@ -199,7 +201,9 @@ class LeftRightEstimator(yarp.RFModule):
                             y_winner = 0
 
                     label = list(CLASS_DICT.keys())[y_winner]
-                    pred = create_bottle((self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), label, prob_mean, received_data.get(0)))
+                    skeleton = yarp.Bottle()
+                    skeleton.addList().read((received_data.get(0).asList()).get(itP))
+                    pred = create_bottle((self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), label, prob_mean, skeleton))
                     human_image = draw_on_img(human_image, self.id_image, (ld[itP, 0], ld[itP, 1]), label, prob_mean)
 
                     self.out_buf_human_array[:, :] = human_image
@@ -208,7 +212,9 @@ class LeftRightEstimator(yarp.RFModule):
 
                     self.buffer = (self.id_image, (int(ld[itP, 0]), int(ld[itP, 1])), y_winner, prob_mean)
                 else:
-                    pred = create_bottle((self.id_image, (), 'unknown', -1, ()))
+                    skeleton = yarp.Bottle()
+                    skeleton.addList().read((received_data.get(0).asList()).get(itP))
+                    pred = create_bottle((self.id_image, (), 'unknown', -1, skeleton))
                     human_image = cv2.putText(human_image, 'id: ' + str(self.id_image), tuple([25, 30]), cv2.FONT_HERSHEY_SIMPLEX,
                                               0.6, (0, 0, 255), 2, cv2.LINE_AA)
 
@@ -218,6 +224,14 @@ class LeftRightEstimator(yarp.RFModule):
                     self.out_port_prediction.write(pred)
 
                     self.buffer = (self.id_image, (), 'unknown', -1)
+            else:
+                print("No data received")
+                human_image = cv2.putText(human_image, 'id: ' + str(self.id_image), tuple([25, 30]), cv2.FONT_HERSHEY_SIMPLEX,
+                                          0.6, (0, 0, 255), 2,
+                                          cv2.LINE_AA)
+                # send in output only the image with the id
+                self.out_buf_human_array[:, :] = human_image
+                self.out_port_human_image.write(self.out_buf_human_image)
 
             # propag received image
             self.out_buf_propag_image_array[:, :] = self.human_image
