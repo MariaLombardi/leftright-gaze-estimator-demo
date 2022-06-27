@@ -153,7 +153,7 @@ class LeftRightEstimator(yarp.RFModule):
                 self.in_buf_human_depth.copy(received_depth)
                 human_depth = np.copy(self.in_buf_human_depth_array)
 
-            received_data = self.in_port_human_data.read()
+            received_data = self.in_port_human_data.read(False)
             if received_data:
                 # take only the person with id 0, we suppose that there is only one person in the scene
                 itP = 0
