@@ -223,7 +223,6 @@ class LeftRightEstimator(yarp.RFModule):
 
                     self.buffer = (self.id_image, (), 'unknown', -1)
             else:
-                print("No data received")
                 human_image = cv2.putText(human_image, 'id: ' + str(self.id_image), tuple([25, 30]), cv2.FONT_HERSHEY_SIMPLEX,
                                           0.6, (0, 0, 255), 2,
                                           cv2.LINE_AA)
